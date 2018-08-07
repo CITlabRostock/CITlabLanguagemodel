@@ -82,4 +82,11 @@
         <!--<artifactId></artifactId>-->
         <!--</dependency>-->
     </dependencies>
+    <repositories>
+        <repository>
+            <id>UIBK</id>
+            <name>UIBK</name>
+            <url>http://dbis-halvar.uibk.ac.at/artifactory/libs-release</url>
+        </repository>
+    </repositories>
 </project>
