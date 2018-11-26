@@ -29,6 +29,7 @@ public class TrainLMTest {
     static String lmPath2 = "konz_c2.arpa";
     static String textdir = "src/test/res/konz_c";
     public static int order = 5;
+
     public TrainLMTest() {
     }
 
@@ -38,14 +39,8 @@ public class TrainLMTest {
 
     @AfterClass
     public static void tearDownClass() {
-        try {
-            new File(lmPath).delete();
-        } catch (Throwable ex) {
-        }
-        try {
-            new File(lmPath2).delete();
-        } catch (Throwable ex) {
-        }
+        FileUtils.deleteQuietly(new File(lmPath));
+        FileUtils.deleteQuietly(new File(lmPath2));
     }
 
     @Before
@@ -54,7 +49,6 @@ public class TrainLMTest {
 
     @After
     public void tearDown() {
-        FileUtils.deleteQuietly(lmPath);
     }
 
 
@@ -104,6 +98,7 @@ public class TrainLMTest {
 //                "ich bin so schön",
 //                "ich bin so toll"), 5, new File("out.txt"));
     }
+
     @Test
     public void testZSameResult() throws IOException {
         List<String> strings1 = FileUtils.readLines(new File(lmPath));
