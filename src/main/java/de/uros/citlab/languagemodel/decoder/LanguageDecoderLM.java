@@ -8,24 +8,24 @@ package de.uros.citlab.languagemodel.decoder;
 import com.achteck.misc.types.ConfMat;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
+import de.planet.citech.types.IDecodingType;
+import de.planet.citech.types.ISortingFunction;
 import de.planet.imaging.types.IWDImage;
 import de.planet.itrtech.types.IDictOccurrence;
 import de.planet.itrtech.writingdecoder.IWritingDecoder;
+import de.planet.langmod.types.ILangMod;
 import de.uros.citlab.languagemodel.beamsearch.CTCBeamSearchTreeset;
 import de.uros.citlab.languagemodel.beamsearch.type.DictTree;
 import de.uros.citlab.languagemodel.beamsearch.type.LMCostMapperChar;
 import de.uros.citlab.languagemodel.lmtypes.ILM;
 import de.uros.citlab.languagemodel.lmtypes.LMNetworkTF;
-import de.planet.citech.types.IDecodingType;
-import de.planet.citech.types.ISortingFunction;
-import de.planet.langmod.types.ILangMod;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * @author tobias
+ * @author tobias, Gundram
  */
 public class LanguageDecoderLM extends ParamTreeOrganizer implements ILanguageDecoder, ILangMod {
 
@@ -41,17 +41,23 @@ public class LanguageDecoderLM extends ParamTreeOrganizer implements ILanguageDe
     private double nacOffset = -Math.log(0.4);
     @ParamAnnotation(member = "lm")
     String lmclass;
-
     protected ILM lm;
+
     private CTCBeamSearchTreeset searcher;
     private ISortingFunction isf;
     private ConfMat cm;
 
     public LanguageDecoderLM() {
-        this(LMNetworkTF.class.getCanonicalName(), "");
+        this(LMNetworkTF.class.getCanonicalName());
     }
 
-    public LanguageDecoderLM(String lmclass, String path2lm) {
+    public LanguageDecoderLM(ILM lm) {
+        this.lm = lm;
+        this.lmclass = lm.getClass().getCanonicalName();
+        addReflection(this, LanguageDecoderLM.class);
+    }
+
+    public LanguageDecoderLM(String lmclass) {
 //        this();
         this.lmclass = lmclass;
         addReflection(this, LanguageDecoderLM.class);
@@ -61,12 +67,19 @@ public class LanguageDecoderLM extends ParamTreeOrganizer implements ILanguageDe
     public void init() {
         super.init();
 //        lm = initLM();
+        initSearcher();
+    }
+
+    private void initSearcher() {
         DictTree tree = new DictTree(lm.getWords());
         searcher = new CTCBeamSearchTreeset(lm, tree, false, lmN, lmM, new LMCostMapperChar(lm, lmAlpha, lmBeta), false, nacOffset);
     }
 
     @Override
     public void setConfMat(ConfMat cm) {
+        if (searcher == null) {
+            initSearcher();
+        }
         searcher.setConfMat(cm);
     }
 

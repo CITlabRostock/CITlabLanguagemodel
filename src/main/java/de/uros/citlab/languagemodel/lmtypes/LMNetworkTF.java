@@ -267,7 +267,7 @@ public class LMNetworkTF extends LMAbstract implements Serializable, ILM {
         Session.Runner feed = s.runner().feed("feeds/input", word_idcs);
 
         Session.Runner fetch = feed.fetch("val/model/output");
-        List<Tensor> run = fetch.run();
+        List<Tensor<?>> run = fetch.run();
         Tensor result = run.get(0);
         FloatBuffer buffer = FloatBuffer.allocate((int) result.shape()[1]);
         result.writeTo(buffer);

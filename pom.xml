@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.uros.citlab</groupId>
         <artifactId>parent_pom</artifactId>
-        <version>1.0</version>
+        <version>1.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,6 +14,29 @@
     <artifactId>languagemodel</artifactId>
     <version>1.0</version>
     <dependencies>
+        <!--CITLAB-->
+        <dependency>
+            <groupId>de.uros.citlab</groupId>
+            <artifactId>tokenizer</artifactId>
+        </dependency>
+
+        <!--TRANSKRIBUS-->
+        <dependency>
+            <groupId>eu.transkribus</groupId>
+            <artifactId>TranskribusInterfaces</artifactId>
+        </dependency>
+
+        <!--APACHE COMMONS-->
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+
+        <!--PLANET-->
         <dependency>
             <groupId>de.planet</groupId>
             <artifactId>misc</artifactId>
@@ -27,26 +50,6 @@
             <artifactId>itrtech</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>edu.berkeley.nlp</groupId>
-            <artifactId>berkeleylm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.tensorflow</groupId>
-            <artifactId>libtensorflow</artifactId>
-        </dependency>
-        <dependency>
             <groupId>de.planet</groupId>
             <artifactId>decoding</artifactId>
         </dependency>
@@ -58,14 +61,21 @@
             <groupId>de.planet</groupId>
             <artifactId>langmod</artifactId>
         </dependency>
+
+        <!--OTHER STUFF-->
         <dependency>
-            <groupId>de.uros.citlab</groupId>
-            <artifactId>tokenizer</artifactId>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
         </dependency>
         <dependency>
-            <groupId>eu.transkribus</groupId>
-            <artifactId>TranskribusInterfaces</artifactId>
+            <groupId>edu.berkeley.nlp</groupId>
+            <artifactId>berkeleylm</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>libtensorflow</artifactId>
+        </dependency>
+
         <!--TEST-->
         <dependency>
             <groupId>junit</groupId>
@@ -77,10 +87,6 @@
             <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>de.planet</groupId>-->
-        <!--<artifactId></artifactId>-->
-        <!--</dependency>-->
     </dependencies>
     <repositories>
         <repository>

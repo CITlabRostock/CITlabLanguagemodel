@@ -12,18 +12,23 @@ import de.uros.citlab.tokenizer.TokenizerCategorizer;
 import de.uros.citlab.tokenizer.categorizer.CategorizerCharacterDft;
 import org.apache.commons.io.FileUtils;
 import org.junit.*;
+import org.junit.runners.MethodSorters;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
-
-import static org.junit.Assert.*;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author tobias
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TrainLMTest {
-    String lmPath = "konz_c.arpa";
-
+    static String lmPath = "konz_c.arpa";
+    static String lmPath2 = "konz_c2.arpa";
+    static String textdir = "src/test/res/konz_c";
+    public static int order = 5;
     public TrainLMTest() {
     }
 
@@ -33,6 +38,14 @@ public class TrainLMTest {
 
     @AfterClass
     public static void tearDownClass() {
+        try {
+            new File(lmPath).delete();
+        } catch (Throwable ex) {
+        }
+        try {
+            new File(lmPath2).delete();
+        } catch (Throwable ex) {
+        }
     }
 
     @Before
@@ -41,8 +54,7 @@ public class TrainLMTest {
 
     @After
     public void tearDown() {
-        File f = new File(lmPath);
-        f.delete();
+        FileUtils.deleteQuietly(lmPath);
     }
 
 
@@ -52,12 +64,11 @@ public class TrainLMTest {
     @Test
     public void testMain() throws Exception {
         System.out.println("main");
-        String textdir = "src/test/res/konz_c";
         String arg = "-tmp temp.txt "
                 + "-txtFolder " + textdir + " "
                 + "-spaceSubs @ "
                 + "-lmFile " + lmPath + " "
-                + "-n 5";
+                + "-n " + order;
         String[] args = arg.split(" ");
         TrainLM.main(args);
 
@@ -76,6 +87,31 @@ public class TrainLMTest {
         System.out.println("ppl: " + ppl);
         // TODO review the generated test code and remove the default call to fail.
 
+    }
+
+    @Test
+    public void testMethod() throws IOException {
+        Collection<File> filelist = FileUtils.listFiles(new File(textdir), new String[]{"txt"}, true);
+        List<String> res = new LinkedList<>();
+        for (File f : filelist) {
+            res.add(FileUtils.readFileToString(f));
+        }
+        TrainLM.train(res, order, new File(lmPath2));
+//        TrainLM.train(Arrays.asList("ich bin so klug",
+//                "ich bin so schlau",
+//                "ich bin der Anton aus Tirol",
+//                "ich habe tolle Waden",
+//                "ich bin so schön",
+//                "ich bin so toll"), 5, new File("out.txt"));
+    }
+    @Test
+    public void testZSameResult() throws IOException {
+        List<String> strings1 = FileUtils.readLines(new File(lmPath));
+        List<String> strings2 = FileUtils.readLines(new File(lmPath2));
+        Assert.assertEquals("files differ", strings1.size(), strings2.size());
+        for (int i = 0; i < strings1.size(); i++) {
+            Assert.assertEquals("files differ in line " + i, strings1.get(i), strings2.get(i));
+        }
     }
 
 }

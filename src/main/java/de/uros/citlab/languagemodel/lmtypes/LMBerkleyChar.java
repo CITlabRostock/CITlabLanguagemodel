@@ -6,15 +6,14 @@
 package de.uros.citlab.languagemodel.lmtypes;
 
 import com.achteck.misc.types.ParamAnnotation;
-import com.achteck.misc.types.ParamTreeOrganizer;
 import edu.berkeley.nlp.lm.ContextEncodedProbBackoffLm;
 import edu.berkeley.nlp.lm.WordIndexer;
 import edu.berkeley.nlp.lm.io.LmReaders;
+
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
  * @author tobias
  */
 public class LMBerkleyChar extends LMAbstract implements ILM {
@@ -29,11 +28,15 @@ public class LMBerkleyChar extends LMAbstract implements ILM {
     LinkedList<String> myPhrase = new LinkedList<String>();
 
     public LMBerkleyChar() {
+
         addReflection(this, LMBerkleyChar.class);
     }
 
+    public LMBerkleyChar(String path2File) {
+        this(path2File, "@");
+    }
+
     /**
-     *
      * @param path2File
      * @param spaceSubs
      */

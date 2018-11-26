@@ -10,9 +10,17 @@ import com.achteck.misc.log.Logger;
 import com.achteck.misc.param.ParamSet;
 import com.achteck.misc.types.ParamAnnotation;
 import com.achteck.misc.types.ParamTreeOrganizer;
-import edu.berkeley.nlp.lm.io.MakeKneserNeyArpaFromText;
 import de.uros.citlab.tokenizer.TokenizerCategorizer;
 import de.uros.citlab.tokenizer.categorizer.CategorizerCharacterDft;
+import edu.berkeley.nlp.lm.ConfigOptions;
+import edu.berkeley.nlp.lm.StringWordIndexer;
+import edu.berkeley.nlp.lm.io.KneserNeyFileWritingLmReaderCallback;
+import edu.berkeley.nlp.lm.io.KneserNeyLmReaderCallback;
+import edu.berkeley.nlp.lm.io.MakeKneserNeyArpaFromText;
+import edu.berkeley.nlp.lm.io.TextReader;
+import eu.transkribus.interfaces.ITokenizer;
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,10 +29,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import org.apache.commons.io.FileUtils;
 
 /**
- *
  * @author tobias
  */
 public class TrainLM extends ParamTreeOrganizer {
@@ -52,14 +58,31 @@ public class TrainLM extends ParamTreeOrganizer {
     }
 
     private void run() throws IOException {
-        String tokenizedtxts = tokenizeTexts(tmp, txtFolder);
+        String tokenizedtxts = tokenizeTexts(tmp, txtFolder, spaceSubs);
         trainLM(tokenizedtxts, lmFile);
 
         Files.delete(Paths.get(tmp));
 
     }
 
-    private String tokenizeTexts(String tmp, String txts) throws IOException {
+    private static String tokenize(String line, String spaceSubs, ITokenizer tokenizer) {
+        if (line.contains("\t")) {
+            line = line.replaceAll("\t", "");
+            LOG.log(Logger.WARN, "Tabulator is deleted: \"" + line + "\"");
+        }
+        List<String> tokenize = tokenizer.tokenize(line);
+        StringBuilder sb = new StringBuilder();
+        for (String token : tokenize) {
+            sb.append(token.equals(" ") ? spaceSubs : token).append(" ");
+        }
+        if (sb.length() > 1) {
+            return sb.substring(0, sb.length() - 1);
+        }
+        return null;
+    }
+
+
+    private static String tokenizeTexts(String tmp, String txts, String spaceSubs) throws IOException {
         TokenizerCategorizer tokenizer = new TokenizerCategorizer(new CategorizerCharacterDft());
         File txtdir = new File(txts);
         File tmpFile = new File(tmp);
@@ -71,21 +94,11 @@ public class TrainLM extends ParamTreeOrganizer {
         LOG.log(Logger.INFO, "found " + filelist.size() + " txt-files to train character LM");
         for (File txtfile : filelist) {
             List<String> lines = Files.readAllLines(Paths.get(txtfile.getAbsolutePath()));
-            LinkedList<String> tokanizedText = new LinkedList<String>();
+            LinkedList<String> tokanizedText = new LinkedList<>();
             for (String line : lines) {
-                if (line.contains("\t")) {
-                    line = line.replaceAll("\t", "");
-                    LOG.log(Logger.WARN, "Tabulator is deleted: \"" + line + "\"");
-                }
-                List<String> tokenize = tokenizer.tokenize(line);
-                StringBuilder sb = new StringBuilder();
-                for (String token : tokenize) {
-                    sb.append(token.equals(" ") ? spaceSubs : token).append(" ");
-
-                }
-
-                if (sb.length() > 1) {
-                    tokanizedText.add(sb.substring(0, sb.length() - 1));
+                String tokenized = tokenize(line, spaceSubs, tokenizer);
+                if (tokenized != null) {
+                    tokanizedText.add(tokenized);
                 }
             }
             FileUtils.writeLines(tmpFile, tokanizedText, true);
@@ -98,6 +111,30 @@ public class TrainLM extends ParamTreeOrganizer {
         String[] args = arg.split(" ");
         Locale.setDefault(Locale.US);
         MakeKneserNeyArpaFromText.main(args);
+    }
+
+    public static void train(List<String> text, int lmOrder, File arpaOutputFile) {
+        train(text, lmOrder, arpaOutputFile, "@");
+    }
+
+    public static void train(List<String> text, int lmOrder, File arpaOutputFile, String spaceSubs) {
+        TokenizerCategorizer tokenizer = new TokenizerCategorizer(new CategorizerCharacterDft());
+        StringWordIndexer wordIndexer = new StringWordIndexer();
+        wordIndexer.setStartSymbol("<s>");
+        wordIndexer.setEndSymbol("</s>");
+        wordIndexer.setUnkSymbol("<unk>");
+        List<String> tokenizedList = new LinkedList<>();
+        for (String line : text) {
+            String tokenize = tokenize(line, spaceSubs, tokenizer);
+            if (tokenize != null) {
+                tokenizedList.add(tokenize);
+            }
+        }
+        TextReader reader = new TextReader((Iterable<String>) tokenizedList, wordIndexer);
+        KneserNeyLmReaderCallback kneserNeyReader = new KneserNeyLmReaderCallback(wordIndexer, lmOrder, new ConfigOptions());
+        reader.parse(kneserNeyReader);
+        kneserNeyReader.parse(new KneserNeyFileWritingLmReaderCallback(arpaOutputFile, wordIndexer));
+
     }
 
     /**

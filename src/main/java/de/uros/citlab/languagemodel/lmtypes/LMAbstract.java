@@ -55,7 +55,7 @@ public abstract class LMAbstract extends ParamTreeOrganizer implements ILM {
         if (withStartAndEnd == false) {
             throw new IllegalArgumentException("without startAndEnd not yet supported. ");
         }
-        LinkedList<String> tmp = new LinkedList<String>();
+        LinkedList<String> tmp = new LinkedList<>();
         for (int i = 0; i < nMinus1; i++) {
             tmp.add(BoS);
         }
